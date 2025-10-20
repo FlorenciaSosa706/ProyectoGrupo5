@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 public class DijkstraService {
 
     // Tipo de peso: "tiempo", "energia", "obstaculos" o cualquier combinación
-    private String tipoPeso = "tiempo";
+    private String tipoPeso = "tiempo"; // HAY QUE DECIDIRSE CON EL TIPO DE PESO, PERO SE PUEDE CAMBIAR.
 
     public void setTipoPeso(String tipoPeso) {
         this.tipoPeso = tipoPeso;
