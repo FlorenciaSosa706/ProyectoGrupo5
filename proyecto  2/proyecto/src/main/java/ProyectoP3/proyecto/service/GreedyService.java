@@ -1,9 +1,17 @@
 package ProyectoP3.proyecto.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+
 import ProyectoP3.proyecto.model.NodoEntity;
 import ProyectoP3.proyecto.model.RutaEntity;
 
+@Service
 public class GreedyService {
 
     public List<NodoEntity> encontrarRutaGreedy(NodoEntity inicio, NodoEntity destino) {

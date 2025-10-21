@@ -5,34 +5,60 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import ProyectoP3.proyecto.model.NodoEntity;
 import ProyectoP3.proyecto.model.RutaEntity;
+import ProyectoP3.proyecto.model.RutaRequest;
+import ProyectoP3.proyecto.repo.NodoRepository;
 import ProyectoP3.proyecto.service.BacktrackingService;
+import ProyectoP3.proyecto.service.DFSService;
+import ProyectoP3.proyecto.service.DivideVencerasService;
 import ProyectoP3.proyecto.service.GreedyService;
+import ProyectoP3.proyecto.service.RamificacionPodaService;
 
 @RestController
 @RequestMapping("/rutas")
 public class RutaController {
 
-    private GreedyService greedyService = new GreedyService();
-    private BacktrackingService backtrackingService = new BacktrackingService();
+    @Autowired
+    private NodoRepository nodoRepository;
+    
+
+    @Autowired
+    private GreedyService greedyService;
+
+    @Autowired
+    private BacktrackingService backtrackingService;
+
+    @Autowired
+    private DFSService dfsService;
+
+    @Autowired
+    private RamificacionPodaService ramificacionPodaService;
+
+    @Autowired
+    private DivideVencerasService divideService;
+
+    
+
+
 
     // ===============================
     // 🔹 RUTA ENTRE DOS NODOS (Greedy)
     // ===============================
     @GetMapping("/greedy/{inicio}/{destino}")
     public List<String> rutaGreedy(@PathVariable String inicio, @PathVariable String destino) {
-        Map<String, NodoEntity> mapa = crearMapa();
-        inicio = inicio.trim();
-        destino = destino.trim();
+        
+        NodoEntity nodoInicio = nodoRepository.findByNombre(inicio.trim()).block();
 
-        NodoEntity nodoInicio = mapa.get(inicio);
-        NodoEntity nodoDestino = mapa.get(destino);
+        NodoEntity nodoDestino = nodoRepository.findByNombre(destino.trim()).block();
 
         if (nodoInicio == null || nodoDestino == null) {
             throw new RuntimeException("Alguno de los nodos no existe en el mapa: " + inicio + " → " + destino);
@@ -51,38 +77,96 @@ public class RutaController {
     // ===============================
     @GetMapping("/backtracking/{inicio}/{destino}")
     public List<String> rutaBacktracking(@PathVariable String inicio, @PathVariable String destino) {
-        Map<String, NodoEntity> mapa = crearMapa();
-        inicio = inicio.trim();
-        destino = destino.trim();
-
-        NodoEntity nodoInicio = mapa.get(inicio);
-        NodoEntity nodoDestino = mapa.get(destino);
+        NodoEntity nodoInicio = nodoRepository.findByNombre(inicio.trim()).block();
+        NodoEntity nodoDestino = nodoRepository.findByNombre(destino.trim()).block();
 
         if (nodoInicio == null || nodoDestino == null) {
-            throw new RuntimeException("Alguno de los nodos no existe en el mapa: " + inicio + " → " + destino);
+            throw new RuntimeException("Alguno de los nodos no existe en Neo4j: " + inicio + " → " + destino);
         }
 
         List<NodoEntity> ruta = backtrackingService.encontrarRutaOptima(nodoInicio, nodoDestino);
-        List<String> nombres = new ArrayList<>();
-        for (NodoEntity n : ruta) {
-            if (n != null) nombres.add(n.getNombre());
-        }
-        return nombres;
+        return ruta.stream().map(NodoEntity::getNombre).toList();
     }
+
+    /////AGREGO ALGORITMO DFS //////
+    @GetMapping("/dfs/{inicio}/{destino}")
+    public List<String> rutaDFS(@PathVariable String inicio, @PathVariable String destino) {
+        NodoEntity nodoInicio = nodoRepository.findByNombre(inicio.trim()).block();
+        NodoEntity nodoDestino = nodoRepository.findByNombre(destino.trim()).block();
+
+        if (nodoInicio == null || nodoDestino == null) {
+            throw new RuntimeException("Alguno de los nodos no existe en Neo4j: " + inicio + " → " + destino);
+        }
+
+        List<NodoEntity> ruta = dfsService.buscarRutaDFS(nodoInicio, nodoDestino);
+        return ruta.stream().map(NodoEntity::getNombre).toList();
+    }
+
+
+    //AGREGO ALGORITMO DE RAMIFICACION Y PODA///////
+    @GetMapping("/poda/{inicio}/{destino}")
+    public List<String> rutaPoda(@PathVariable String inicio, @PathVariable String destino) {
+        NodoEntity nodoInicio = nodoRepository.findByNombre(inicio.trim()).block();
+        NodoEntity nodoDestino = nodoRepository.findByNombre(destino.trim()).block();
+
+        if (nodoInicio == null || nodoDestino == null) {
+            throw new RuntimeException("Alguno de los nodos no existe en Neo4j: " + inicio + " → " + destino);
+        }
+
+        List<NodoEntity> ruta = ramificacionPodaService.buscarRutaOptima(nodoInicio, nodoDestino);
+        return ruta.stream().map(NodoEntity::getNombre).toList();
+}
+
+
+    /////////AGREGO ALGORITMO DE DIVIDE Y VENCERÁS////////
+    @GetMapping("/divide")
+    public double rutaDividida() {
+        List<NodoEntity> rutaSecuencial = List.of(
+            nodoRepository.findByNombre("Base Central").block(),
+            nodoRepository.findByNombre("Hospital Norte").block(),
+            nodoRepository.findByNombre("Punto Recarga 1").block(),
+            nodoRepository.findByNombre("Barrio El Progreso").block()
+        );
+
+        return divideService.resolverRutaDividida(rutaSecuencial);
+    }
+
+
+    @PostMapping("/crear-ruta")
+    public void crearRuta(@RequestBody RutaRequest request) {
+        NodoEntity origen = nodoRepository.findByNombre(request.getOrigen()).block();
+        NodoEntity destino = nodoRepository.findByNombre(request.getDestino()).block();
+
+        if (origen == null || destino == null) {
+            throw new RuntimeException("Origen o destino no encontrado");
+        }
+
+        RutaEntity ruta = new RutaEntity(
+            request.getTiempo(),
+            request.getEnergia(),
+            request.getClima(),
+            request.getObstaculos(),
+            destino
+        );
+
+    origen.getRutas().add(ruta);
+    nodoRepository.save(origen).block();
+}
+
+
+
+
+
 
     // =========================================
     // 🔹 NUEVO: RUTA COMPLETA DEL DRON (recorrido)
     // =========================================
     @GetMapping("/dron")
     public Map<String, Object> rutaDelDron() {
-        Map<String, NodoEntity> mapa = crearMapa();
         List<String> recorrido = new ArrayList<>();
-
-        // El dron empieza en el centro de distribución
-        NodoEntity actual = mapa.get("Base Central");
+        NodoEntity actual = nodoRepository.findByNombre("Base Central").block();
         recorrido.add("🚁 Dron despega desde " + actual.getNombre());
 
-        // Secuencia de entrega (puede variarse)
         String[] paradas = {
             "Hospital Norte",
             "Barrio El Progreso",
@@ -94,7 +178,7 @@ public class RutaController {
         };
 
         for (String destino : paradas) {
-            NodoEntity nodoDestino = mapa.get(destino);
+            NodoEntity nodoDestino = nodoRepository.findByNombre(destino).block();
             if (nodoDestino != null) {
                 recorrido.add("➡️ Vuelo hacia " + nodoDestino.getNombre() + " (" + nodoDestino.getTipo() + ")");
                 recorrido.add("Entrega completada en " + nodoDestino.getNombre() + " ✅");
@@ -108,6 +192,13 @@ public class RutaController {
         respuesta.put("nodos_visitados", paradas.length + 1);
         return respuesta;
     }
+    @PostMapping("/nodos/crear")
+    public void crearNodo(@RequestBody NodoEntity nodo) {
+        nodoRepository.save(nodo).block();
+    }   
+
+    
+
 
     // =========================================
     // 🔹 GRAFO COMPLETO DE NODOS Y CONEXIONES
