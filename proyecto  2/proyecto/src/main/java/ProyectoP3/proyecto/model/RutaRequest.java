@@ -1,6 +1,5 @@
 package ProyectoP3.proyecto.model;
 
-
 public class RutaRequest {
     private String origen;
     private String destino;
@@ -8,13 +7,12 @@ public class RutaRequest {
     private int energia;
     private String clima;
     private double obstaculos;
+    private String tipoPeso;
 
     // Getters y setters
-
     public String getOrigen() {
         return origen;
     }
-
     public void setOrigen(String origen) {
         this.origen = origen;
     }
@@ -22,7 +20,6 @@ public class RutaRequest {
     public String getDestino() {
         return destino;
     }
-
     public void setDestino(String destino) {
         this.destino = destino;
     }
@@ -30,7 +27,6 @@ public class RutaRequest {
     public int getTiempo() {
         return tiempo;
     }
-
     public void setTiempo(int tiempo) {
         this.tiempo = tiempo;
     }
@@ -38,7 +34,6 @@ public class RutaRequest {
     public int getEnergia() {
         return energia;
     }
-
     public void setEnergia(int energia) {
         this.energia = energia;
     }
@@ -46,7 +41,6 @@ public class RutaRequest {
     public String getClima() {
         return clima;
     }
-
     public void setClima(String clima) {
         this.clima = clima;
     }
@@ -54,8 +48,14 @@ public class RutaRequest {
     public double getObstaculos() {
         return obstaculos;
     }
-
     public void setObstaculos(double obstaculos) {
         this.obstaculos = obstaculos;
+    }
+
+    public String getTipoPeso() {
+        return tipoPeso;
+    }
+    public void setTipoPeso(String tipoPeso) {
+        this.tipoPeso = tipoPeso;
     }
 }

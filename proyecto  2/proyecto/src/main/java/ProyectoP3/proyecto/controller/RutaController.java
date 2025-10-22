@@ -19,6 +19,7 @@ import ProyectoP3.proyecto.model.RutaRequest;
 import ProyectoP3.proyecto.repo.NodoRepository;
 import ProyectoP3.proyecto.service.BacktrackingService;
 import ProyectoP3.proyecto.service.DFSService;
+import ProyectoP3.proyecto.service.DijkstraService;
 import ProyectoP3.proyecto.service.DivideVencerasService;
 import ProyectoP3.proyecto.service.GreedyService;
 import ProyectoP3.proyecto.service.ProgramacionDinamicaService;
@@ -138,4 +139,29 @@ public class RutaController {
         respuesta.put("nodos_visitados", paradas.length + 1);
         return respuesta;
     }
+@Autowired
+private DijkstraService dijkstraService;
+
+@PostMapping("/dijkstra")
+public List<String> rutaDijkstra(@RequestBody RutaRequest request) {
+    NodoEntity nodoInicio = nodoRepository.findByNombre(request.getOrigen()).block();
+    NodoEntity nodoDestino = nodoRepository.findByNombre(request.getDestino()).block();
+
+    if (nodoInicio == null || nodoDestino == null) {
+        throw new RuntimeException("Origen o destino no encontrado");
+    }
+
+    // Configurar tipo de peso si se pasa en el request
+    if (request.getTipoPeso() != null && !request.getTipoPeso().isEmpty()) {
+        dijkstraService.setTipoPeso(request.getTipoPeso());
+    }
+
+    List<NodoEntity> ruta = dijkstraService.calcularRutaMinima(nodoInicio, nodoDestino);
+
+    List<String> nombres = new ArrayList<>();
+    for (NodoEntity n : ruta) {
+        if (n != null) nombres.add(n.getNombre());
+    }
+    return nombres;
+}
 }
