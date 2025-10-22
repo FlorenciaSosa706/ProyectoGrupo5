@@ -1,4 +1,3 @@
-
 package ProyectoP3.proyecto.service;
 
 import java.util.ArrayList;
@@ -14,48 +13,58 @@ import ProyectoP3.proyecto.model.RutaEntity;
 @Service
 public class RamificacionPodaService {
 
-    private List<NodoEntity> mejorRuta = new ArrayList<>();
-    private double mejorPeso = Double.MAX_VALUE;
+    double mejorPeso = Double.MAX_VALUE;
+    List<NodoEntity> mejorRuta = new ArrayList<>();
 
     public List<NodoEntity> buscarRutaOptima(NodoEntity inicio, NodoEntity destino) {
-        mejorRuta.clear();
         mejorPeso = Double.MAX_VALUE;
-        explorar(inicio, destino, new HashSet<>(), new ArrayList<>(), 0);
+        mejorRuta.clear();
+        Set<String> visitados = new HashSet<>();
+        List<NodoEntity> rutaActual = new ArrayList<>();
+        explorar(inicio, destino, visitados, rutaActual, 0);
         return mejorRuta;
     }
 
-    private void explorar(NodoEntity actual, NodoEntity destino, Set<NodoEntity> visitados, List<NodoEntity> rutaActual, double pesoAcumulado) {
-        if (pesoAcumulado >= mejorPeso) return; // ✂️ Poda
+    private void explorar(NodoEntity actual, NodoEntity destino, Set<String> visitados, List<NodoEntity> rutaActual, double peso) {
+        if (actual == null) return;
 
-        if (actual.equals(destino)) {
-            mejorPeso = pesoAcumulado;
+        // ✂️ Poda: si ya superamos el mejor peso, no seguimos
+        if (peso >= mejorPeso) return;
+
+        if (actual.getNombre().equalsIgnoreCase(destino.getNombre())) {
+            rutaActual.add(actual);
+            mejorPeso = peso;
             mejorRuta = new ArrayList<>(rutaActual);
+            rutaActual.remove(rutaActual.size() - 1);
             return;
         }
 
-        visitados.add(actual);
+        if (visitados.contains(actual.getNombre())) return;
+
+        visitados.add(actual.getNombre());
         rutaActual.add(actual);
 
-        for (RutaEntity ruta : actual.getRutas()) {
-            NodoEntity siguiente = ruta.getDestino();
-            if (!visitados.contains(siguiente)) {
-                double nuevoPeso = pesoAcumulado + calcularPeso(ruta, siguiente.getUrgencia());
-                explorar(siguiente, destino, visitados, rutaActual, nuevoPeso);
+        if (actual.getRutas() != null) {
+            for (RutaEntity r : actual.getRutas()) {
+                NodoEntity sig = r.getDestino();
+                if (sig != null && !visitados.contains(sig.getNombre())) {
+                    double nuevoPeso = peso + calcularPeso(r, sig.getUrgencia());
+                    explorar(sig, destino, visitados, rutaActual, nuevoPeso);
+                }
             }
         }
 
         rutaActual.remove(rutaActual.size() - 1);
-        visitados.remove(actual);
+        visitados.remove(actual.getNombre());
     }
 
     private double calcularPeso(RutaEntity r, int urgencia) {
-        double climaFactor = switch (r.getClima().toLowerCase()) {
-            case "viento" -> 0.2;
-            case "lluvia" -> 0.4;
-            case "tormenta" -> 0.7;
-            default -> 0.0;
-        };
-
-        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + climaFactor;
+        double clima = 0;
+        if (r.getClima() != null) {
+            if (r.getClima().equalsIgnoreCase("Viento")) clima = 0.2;
+            else if (r.getClima().equalsIgnoreCase("Lluvia")) clima = 0.4;
+            else if (r.getClima().equalsIgnoreCase("Tormenta")) clima = 0.7;
+        }
+        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + clima;
     }
 }

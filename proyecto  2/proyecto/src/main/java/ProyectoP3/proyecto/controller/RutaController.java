@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -83,6 +84,28 @@ public class RutaController {
     }
 
     @GetMapping("/divide")
+public Map<String, Object> rutaDividida(@RequestParam List<String> nodos) {
+    List<NodoEntity> rutaSecuencial = new ArrayList<>();
+
+    for (String nombre : nodos) {
+        NodoEntity nodo = nodoRepository.findByNombre(nombre.trim()).block();
+        if (nodo == null) {
+            throw new RuntimeException("⚠️ Nodo no encontrado: " + nombre);
+        }
+        rutaSecuencial.add(nodo);
+    }
+
+    double costoTotal = divideService.resolverRutaDividida(rutaSecuencial);
+
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("ruta", nodos);
+    respuesta.put("costoTotal", Math.round(costoTotal * 100.0) / 100.0); // redondeado a 2 decimales
+    return respuesta;
+}
+
+
+
+
     public double rutaDividida() {
         List<NodoEntity> rutaSecuencial = List.of(
             nodoRepository.findByNombre("Base Central").block(),
@@ -139,21 +162,25 @@ public class RutaController {
         respuesta.put("nodos_visitados", paradas.length + 1);
         return respuesta;
     }
-@Autowired
+
+    @Autowired
 private DijkstraService dijkstraService;
 
-@PostMapping("/dijkstra")
-public List<String> rutaDijkstra(@RequestBody RutaRequest request) {
-    NodoEntity nodoInicio = nodoRepository.findByNombre(request.getOrigen()).block();
-    NodoEntity nodoDestino = nodoRepository.findByNombre(request.getDestino()).block();
+@GetMapping("/dijkstra/{origen}/{destino}")
+public List<String> rutaDijkstra(
+        @PathVariable String origen,
+        @PathVariable String destino,
+        @RequestParam(required = false) String tipoPeso) {
+
+    NodoEntity nodoInicio = nodoRepository.findByNombre(origen.trim()).block();
+    NodoEntity nodoDestino = nodoRepository.findByNombre(destino.trim()).block();
 
     if (nodoInicio == null || nodoDestino == null) {
         throw new RuntimeException("Origen o destino no encontrado");
     }
 
-    // Configurar tipo de peso si se pasa en el request
-    if (request.getTipoPeso() != null && !request.getTipoPeso().isEmpty()) {
-        dijkstraService.setTipoPeso(request.getTipoPeso());
+    if (tipoPeso != null && !tipoPeso.isEmpty()) {
+        dijkstraService.setTipoPeso(tipoPeso);
     }
 
     List<NodoEntity> ruta = dijkstraService.calcularRutaMinima(nodoInicio, nodoDestino);
@@ -164,4 +191,5 @@ public List<String> rutaDijkstra(@RequestBody RutaRequest request) {
     }
     return nombres;
 }
+
 }

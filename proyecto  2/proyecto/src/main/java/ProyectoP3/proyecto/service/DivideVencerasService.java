@@ -1,4 +1,3 @@
-
 package ProyectoP3.proyecto.service;
 
 import java.util.List;
@@ -11,32 +10,30 @@ import ProyectoP3.proyecto.model.RutaEntity;
 @Service
 public class DivideVencerasService {
 
-    /**
-     * Divide el problema en pares de nodos consecutivos y calcula el peso de cada tramo.
-     * No usa DFS ni backtracking, solo calcula directamente los pesos entre nodos conectados.
-     */
     public double resolverRutaDividida(List<NodoEntity> rutaSecuencial) {
-        double pesoTotal = 0.0;
+        double pesoTotal = 0;
 
-        for (int i = 0; i < rutaSecuencial.size() - 1; i++) {
+        for(int i = 0; i < rutaSecuencial.size() - 1; i++) {
             NodoEntity origen = rutaSecuencial.get(i);
             NodoEntity destino = rutaSecuencial.get(i + 1);
 
-            RutaEntity ruta = encontrarRutaDirecta(origen, destino);
-            if (ruta != null) {
+            RutaEntity ruta = buscarRutaDirecta(origen, destino);
+
+            if(ruta != null) {
                 pesoTotal += calcularPeso(ruta, destino.getUrgencia());
             } else {
-                // Si no hay conexión directa, se penaliza o se lanza excepción
-                pesoTotal += 1000; // penalización arbitraria
+                // si no hay conexión directa, le sumo un peso grande como penalización
+                pesoTotal += 1000;
             }
         }
 
         return pesoTotal;
     }
 
-    private RutaEntity encontrarRutaDirecta(NodoEntity origen, NodoEntity destino) {
-        for (RutaEntity r : origen.getRutas()) {
-            if (r.getDestino().equals(destino)) {
+    private RutaEntity buscarRutaDirecta(NodoEntity origen, NodoEntity destino) {
+        if(origen.getRutas() == null) return null;
+        for(RutaEntity r : origen.getRutas()) {
+            if(r.getDestino().getNombre().equalsIgnoreCase(destino.getNombre())) {
                 return r;
             }
         }
@@ -44,13 +41,12 @@ public class DivideVencerasService {
     }
 
     private double calcularPeso(RutaEntity r, int urgencia) {
-        double climaFactor = switch (r.getClima().toLowerCase()) {
-            case "viento" -> 0.2;
-            case "lluvia" -> 0.4;
-            case "tormenta" -> 0.7;
-            default -> 0.0;
-        };
-
-        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + climaFactor;
+        double clima = 0;
+        if(r.getClima() != null) {
+            if(r.getClima().equalsIgnoreCase("Viento")) clima = 0.2;
+            else if(r.getClima().equalsIgnoreCase("Lluvia")) clima = 0.4;
+            else if(r.getClima().equalsIgnoreCase("Tormenta")) clima = 0.7;
+        }
+        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + clima;
     }
 }
