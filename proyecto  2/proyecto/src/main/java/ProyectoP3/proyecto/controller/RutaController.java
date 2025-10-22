@@ -21,6 +21,7 @@ import ProyectoP3.proyecto.service.BacktrackingService;
 import ProyectoP3.proyecto.service.DFSService;
 import ProyectoP3.proyecto.service.DivideVencerasService;
 import ProyectoP3.proyecto.service.GreedyService;
+import ProyectoP3.proyecto.service.ProgramacionDinamicaService;
 import ProyectoP3.proyecto.service.RamificacionPodaService;
 
 @RestController
@@ -197,7 +198,21 @@ public class RutaController {
         nodoRepository.save(nodo).block();
     }   
 
-    
+    @Autowired
+private ProgramacionDinamicaService programacionDinamicaService;
+
+@GetMapping("/dinamica")
+public double rutaDinamica() {
+    List<NodoEntity> rutaSecuencial = List.of(
+        nodoRepository.findByNombre("Base Central").block(),
+        nodoRepository.findByNombre("Hospital Norte").block(),
+        nodoRepository.findByNombre("Punto Recarga 1").block(),
+        nodoRepository.findByNombre("Barrio El Progreso").block()
+    );
+
+    return programacionDinamicaService.resolverRutaDinamica(rutaSecuencial);
+}
+
 
 
     // =========================================
