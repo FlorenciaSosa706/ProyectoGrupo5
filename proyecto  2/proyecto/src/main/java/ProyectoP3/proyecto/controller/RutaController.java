@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -120,16 +121,26 @@ public class RutaController {
 
     /////////AGREGO ALGORITMO DE DIVIDE Y VENCERÁS////////
     @GetMapping("/divide")
-    public double rutaDividida() {
-        List<NodoEntity> rutaSecuencial = List.of(
-            nodoRepository.findByNombre("Base Central").block(),
-            nodoRepository.findByNombre("Hospital Norte").block(),
-            nodoRepository.findByNombre("Punto Recarga 1").block(),
-            nodoRepository.findByNombre("Barrio El Progreso").block()
-        );
+public Map<String, Object> rutaDividida(@RequestParam List<String> nodos) {
+    List<NodoEntity> rutaSecuencial = new ArrayList<>();
 
-        return divideService.resolverRutaDividida(rutaSecuencial);
+    for (String nombre : nodos) {
+        NodoEntity nodo = nodoRepository.findByNombre(nombre.trim()).block();
+        if (nodo == null) {
+            throw new RuntimeException("⚠️ Nodo no encontrado: " + nombre);
+        }
+        rutaSecuencial.add(nodo);
     }
+
+    double costoTotal = divideService.resolverRutaDividida(rutaSecuencial);
+
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("ruta", nodos);
+    respuesta.put("costoTotal", Math.round(costoTotal * 100.0) / 100.0); // redondeado a 2 decimales
+    return respuesta;
+}
+
+
 
 
     @PostMapping("/crear-ruta")
