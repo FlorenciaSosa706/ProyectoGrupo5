@@ -31,13 +31,17 @@ public class DijkstraService {
 
             if (actual.equals(destino)) break;
 
+            // Explorar vecinos del nodo actual
             for (RutaEntity ruta : actual.getRutas()) {
                 NodoEntity vecino = ruta.getDestino();
                 if (visitados.contains(vecino)) continue;
 
+                
                 double peso = getPesoRuta(ruta); // calcula el peso según tipoPeso
+                // Calcular nueva distancia acumulada
                 double nuevaDistancia = distancias.getOrDefault(actual, Double.MAX_VALUE) + peso;
 
+                 // Si encontramos un camino más corto hacia el vecino, actualizamos datos
                 if (nuevaDistancia < distancias.getOrDefault(vecino, Double.MAX_VALUE)) {
                     distancias.put(vecino, nuevaDistancia);
                     predecesores.put(vecino, actual);
@@ -46,18 +50,18 @@ public class DijkstraService {
             }
         }
 
-        // Reconstruir camino
+        // Reconstrucción del camino final (del destino hacia el origen)
         List<NodoEntity> camino = new LinkedList<>();
         NodoEntity paso = destino;
         while (paso != null) {
-            camino.add(0, paso);
+            camino.add(0, paso); // Insertar al principio para mantener el orden
             paso = predecesores.get(paso);
         }
 
         return camino;
     }
 
-    // Determina el "peso" de la ruta según la variable tipoPeso
+    // PUEDE QUE SEA  MODIFICADO DEPENDIENDO DE QUE QUEREMOS HACER CON EL PESO. Determina el peso a usar en cada ruta dependiendo del tipo configurado.
     private double getPesoRuta(RutaEntity ruta) {
         switch (tipoPeso.toLowerCase()) {
             case "energia": return ruta.getEnergia();
