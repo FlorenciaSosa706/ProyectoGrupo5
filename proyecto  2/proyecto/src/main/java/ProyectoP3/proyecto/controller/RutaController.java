@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+//AGREGADOOOO
+import ProyectoP3.proyecto.dto.NodoDTO;
+import ProyectoP3.proyecto.dto.RutaDTO;
 import ProyectoP3.proyecto.model.NodoEntity;
 import ProyectoP3.proyecto.model.RutaEntity;
 import ProyectoP3.proyecto.model.RutaRequest;
@@ -26,8 +30,11 @@ import ProyectoP3.proyecto.service.GreedyService;
 import ProyectoP3.proyecto.service.ProgramacionDinamicaService;
 import ProyectoP3.proyecto.service.RamificacionPodaService;
 
+
 @RestController
 @RequestMapping("/rutas")
+//agregado
+@CrossOrigin(origins = {"http://localhost:5500", "http://127.0.0.1:5500"})
 public class RutaController {
 
     @Autowired
@@ -90,7 +97,7 @@ public Map<String, Object> rutaDividida(@RequestParam List<String> nodos) {
     for (String nombre : nodos) {
         NodoEntity nodo = nodoRepository.findByNombre(nombre.trim()).block();
         if (nodo == null) {
-            throw new RuntimeException("⚠️ Nodo no encontrado: " + nombre);
+            throw new RuntimeException("Nodo no encontrado: " + nombre);
         }
         rutaSecuencial.add(nodo);
     }
@@ -191,5 +198,47 @@ public List<String> rutaDijkstra(
     }
     return nombres;
 }
+//AGREGADO////////////
+// En RutaController.java
+// ... (imports y otros métodos) ...
 
-}
+@GetMapping("/grafo")
+public Map<String, Object> obtenerGrafo() {
+    List<NodoEntity> nodosEntities = nodoRepository.findAll().collectList().block();
+    List<NodoDTO> nodosDTO = new ArrayList<>();
+    // No necesitamos aristasDTO a nivel raíz si ya las ponemos dentro del nodo
+    // List<RutaDTO> aristasDTO = new ArrayList<>(); 
+
+    for (NodoEntity n : nodosEntities) {
+        NodoDTO nodo = new NodoDTO();
+        nodo.nombre = n.getNombre();
+        nodo.tipo = n.getTipo();
+        nodo.urgencia = n.getUrgencia();
+        nodo.personasAfectadas = n.getPersonasAfectadas();
+        nodo.x = n.getX(); 
+        nodo.y = n.getY();
+
+        // Mapear las rutas salientes a RutaDTOs
+        for (RutaEntity r : n.getRutas()) {
+            // Usa el constructor de RutaDTO que toma RutaEntity si lo creaste
+            nodo.rutas.add(new RutaDTO(r)); 
+            // O mapea manualmente:
+            // RutaDTO arista = new RutaDTO();
+            // arista.destino = r.getDestino().getNombre();
+            // arista.tiempo = r.getTiempo();
+            // arista.energia = r.getEnergia();
+            // arista.clima = r.getClima();
+            // arista.obstaculos = r.getObstaculos();
+            // arista.pesoTotal = (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (r.getDestino().getUrgencia() * 0.2);
+            // nodo.rutas.add(arista);
+        }
+        nodosDTO.add(nodo);
+    }
+
+    Map<String, Object> respuesta = new HashMap<>();
+    respuesta.put("nodos", nodosDTO);
+    // Ya no es necesario un "aristas" a nivel raíz si están anidadas en los nodos
+    // respuesta.put("aristas", aristasDTO); 
+    return respuesta;
+}}
+

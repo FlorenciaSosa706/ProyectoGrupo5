@@ -1,178 +1,87 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Full Stack — Landing Animada</title>
-  <style>
-    :root{
-      --bg1:#0f172a;
-      --bg2:#0b1220;
-      --accent1:#7c3aed; /* violeta */
-      --accent2:#06b6d4; /* cyan */
-      --neon: 0 0 10px rgba(124,58,237,0.7), 0 0 30px rgba(6,182,212,0.18);
-      --glass: rgba(255,255,255,0.04);
-      --card: rgba(255,255,255,0.03);
-    }
-
-    /* Reset minimal */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    body{
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.12), transparent),
-                  radial-gradient(900px 400px at 90% 80%, rgba(6,182,212,0.06), transparent),
-                  linear-gradient(180deg,var(--bg1),var(--bg2));
-      color:#e6eef8;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:32px;
-      overflow:hidden;
-    }
-
-    /* Floating blobs */
-    .blob{
-      position:absolute;filter:blur(40px);opacity:0.7;mix-blend-mode:screen;border-radius:50%;
-      animation: float 8s ease-in-out infinite alternate;
-    }
-    .blob.a{width:420px;height:420px;left:-10%;top:-5%;background:linear-gradient(45deg,var(--accent1),transparent);animation-duration:10s}
-    .blob.b{width:320px;height:320px;right:-8%;bottom:-10%;background:linear-gradient(45deg,var(--accent2),transparent);animation-duration:12s}
-    @keyframes float{to{transform:translateY(-30px) translateX(20px) rotate(6deg)}}
-
-    /* Card */
-    .card{
-      position:relative;z-index:2;max-width:980px;width:100%;padding:48px;border-radius:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));backdrop-filter:blur(6px);box-shadow:0 10px 40px rgba(2,6,23,0.6);
-      display:grid;grid-template-columns:1fr 360px;gap:28px;align-items:center;
-    }
-
-    /* Left — headline */
-    .headline{
-      padding:8px 0;
-    }
-
-    .title{
-      font-size: clamp(28px, 6vw, 64px);
-      line-height:0.95;
-      font-weight:800;
-      letter-spacing: -1px;
-      display:flex;flex-wrap:wrap;gap:12px;align-items:center;
-    }
-
-    /* Neon word */
-    .neon{
-      font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      font-weight:900;padding:6px 12px;border-radius:10px;position:relative;display:inline-block;
-      color:transparent;background:linear-gradient(90deg,var(--accent1),var(--accent2));
-      -webkit-background-clip:text;background-clip:text;text-shadow:var(--neon);
-      filter:drop-shadow(0 6px 18px rgba(6,182,212,0.08));
-      transform:translateY(0);
-      animation: popIn 900ms cubic-bezier(.2,.9,.3,1) both;
-    }
-
-    @keyframes popIn{
-      0%{opacity:0;transform:translateY(18px) scale(.98)}
-      60%{opacity:1;transform:translateY(-6px) scale(1.05)}
-      100%{transform:translateY(0) scale(1)}
-    }
-
-    /* Letter by letter reveal */
-    .letters{display:inline-flex;gap:6px;overflow:visible}
-    .letters span{display:inline-block;opacity:0;transform:translateY(24px) rotateX(30deg);animation:letterIn .9s cubic-bezier(.2,.9,.3,1) forwards}
-    .letters span:nth-child(1){animation-delay:.05s}
-    .letters span:nth-child(2){animation-delay:.1s}
-    .letters span:nth-child(3){animation-delay:.15s}
-    .letters span:nth-child(4){animation-delay:.2s}
-    .letters span:nth-child(5){animation-delay:.25s}
-    .letters span:nth-child(6){animation-delay:.3s}
-    .letters span:nth-child(7){animation-delay:.35s}
-    .letters span:nth-child(8){animation-delay:.4s}
-    .letters span:nth-child(9){animation-delay:.45s}
-    .letters span:nth-child(10){animation-delay:.5s}
-    .letters span:nth-child(11){animation-delay:.55s}
-
-    @keyframes letterIn{to{opacity:1;transform:none}}
-
-    .subtitle{
-      margin-top:18px;font-size:16px;color:rgba(230,238,248,0.85);
-      max-width:56ch;line-height:1.5;opacity:0;animation:fadeUp .9s .6s forwards
-    }
-    @keyframes fadeUp{to{opacity:1;transform:none}}
-
-    /* Right — small panel */
-    .panel{background:linear-gradient(180deg,var(--card),rgba(255,255,255,0.02));padding:18px;border-radius:14px;border:1px solid rgba(255,255,255,0.03)}
-    .panel h3{font-size:14px;margin-bottom:10px;color:rgba(230,238,248,0.9)}
-    .pill{display:flex;gap:10px;align-items:center}
-    .dot{width:14px;height:14px;border-radius:50%;background:linear-gradient(180deg,var(--accent1),var(--accent2));box-shadow:var(--neon)}
-    .meta{font-size:13px;color:rgba(230,238,248,0.8)}
-
-    /* small floating cursor */
-    .cursor{
-      margin-top:16px;display:inline-flex;align-items:center;gap:8px
-    }
-    .cursor .bar{width:8px;height:24px;border-radius:4px;background:linear-gradient(180deg,var(--accent2),var(--accent1));animation:blink 1.1s steps(2) infinite}
-    @keyframes blink{50%{opacity:0}}
-
-    /* Footer */
-    .footer{margin-top:18px;font-size:12px;color:rgba(230,238,248,0.6)}
-
-    /* Responsiveness */
-    @media (max-width:860px){
-      .card{grid-template-columns:1fr;padding:28px}
-      .panel{order:2}
-    }
-
-    /* small decorative code lines */
-    .code-line{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace;font-size:13px;color:rgba(230,238,248,0.65);background:rgba(255,255,255,0.02);padding:8px;border-radius:8px;margin-top:12px}
-
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulación de Rutas de Drones</title>
+  <!-- Incluye Cytoscape.js -->
+  <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="blob a" aria-hidden="true"></div>
-  <div class="blob b" aria-hidden="true"></div>
+<div class="container">
+  <header>
+    <h1>Simulación de Rutas de Drones</h1>
+    <p class="subtitle">Seleccioná origen, destino y algoritmo para encontrar la ruta óptima</p>
+  </header>
 
-  <main class="card" role="main">
-    <section class="headline">
-      <div class="title" aria-hidden="false">
-        <div style="font-size:18px;font-weight:700;color:rgba(230,238,248,0.65);letter-spacing:1px">Hola, soy</div>
-        <div class="neon" aria-hidden="true">
-          <span class="letters" aria-hidden="true">
-            <span>F</span><span>U</span><span>L</span><span>L</span>
-            <span>&nbsp;</span>
-            <span>S</span><span>T</span><span>A</span><span>C</span><span>K</span>
-          </span>
+  <div class="main-content">
+    <!-- Panel de control -->
+    <div class="control-panel">
+      <div class="panel-section">
+        <h3>Opciones de Ruta</h3>
+        <div class="form-group">
+          <label for="origen">Nodo Origen</label>
+          <select id="origen"></select>
         </div>
+        <div class="form-group">
+          <label for="destino">Nodo Destino</label>
+          <select id="destino"></select>
+        </div>
+        <div class="form-group">
+          <label for="algoritmo">Algoritmo</label>
+          <select id="algoritmo">
+            <option value="greedy">Greedy</option>
+            <option value="backtracking">Backtracking</option>
+            <option value="dfs">DFS</option>
+            <option value="poda">Ramificación y Poda</option>
+            <option value="dijkstra">Dijkstra</option>
+          </select>
+        </div>
+        <div class="form-group" id="tipo-peso-dijkstra-group" style="display: none;">
+          <label for="tipoPesoDijkstra">Criterio Dijkstra</label>
+          <select id="tipoPesoDijkstra">
+            <option value="tiempo">Tiempo</option>
+            <option value="energia">Energía</option>
+            <option value="obstaculos">Obstáculos</option>
+            <option value="urgencia">Urgencia</option>
+            <option value="total">Peso Total (Combinado)</option>
+          </select>
+        </div>
+        <button class="btn-primary" id="ejecutar">Ejecutar Ruta</button>
+        <button class="btn-secondary" id="reset">Reiniciar Grafo</button>
       </div>
 
-      <p class="subtitle">Un pequeño landing con estilo — letras con efecto "neón" y entrada por letra. Ideal como portada para tu portafolio Full Stack.</p>
-
-      <div class="code-line" aria-hidden="true">&lt;main&gt; &lt;h1&gt;Full Stack&lt;/h1&gt; &lt;/main&gt;</div>
-
-      <div class="footer">¿Querés que lo convierta en un archivo con tu nombre o lo adaptemos a React?</div>
-    </section>
-
-    <aside class="panel" aria-label="Panel informativo">
-      <h3>Detalles</h3>
-      <div class="pill"><div class="dot" aria-hidden="true"></div><div class="meta">Animación por letra • CSS puro • Responsive</div></div>
-
-      <div class="cursor">
-        <div class="bar" aria-hidden="true"></div>
-        <div class="meta">Tip: copiá este archivo a <code>index.html</code> y abrilo en el navegador</div>
+      <div class="panel-section route-details">
+        <h4>Ruta Detallada</h4>
+        <div id="route-list"></div>
       </div>
-    </aside>
-  </main>
+      
+      <div class="panel-section">
+        <h3>Estadísticas de Ruta</h3>
+        <div id="route-stats">
+        <p><strong>Costo Total:</strong> <span id="total-cost">N/A</span></p>
+        <p><strong>Nodos Visitados:</strong> <span id="nodes-visited">N/A</span></p>
+        <hr>
+        <p><strong>Tiempo Total:</strong> <span id="stat-tiempo">N/A</span></p>
+        <p><strong>Energía Total:</strong> <span id="stat-energia">N/A</span></p>
+        <p><strong>Obstáculos Totales:</strong> <span id="stat-obstaculos">N/A</span></p>
+        <p><strong>Urgencia Promedio:</strong> <span id="stat-urgencia">N/A</span></p>
+        <p><strong>Peso Total Acumulado:</strong> <span id="stat-pesoTotal">N/A</span></p>
+      </div>
+      </div>
 
-  <script>
-    // Pequeño efecto extra: loop suave sobre el brillo del neón
-    const neon = document.querySelector('.neon');
-    let t = 0;
-    function pulse(){
-      t += 0.02;
-      const blur = 8 + Math.sin(t) * 6;
-      neon.style.textShadow = `0 0 ${blur}px rgba(124,58,237,0.8), 0 0 ${blur*2}px rgba(6,182,212,0.16)`;
-      requestAnimationFrame(pulse);
-    }
-    requestAnimationFrame(pulse);
-  </script>
+
+      <div id="status-message">Cargando grafo...</div>
+    </div>
+
+    <!-- Mapa -->
+    <div class="map-container">
+      <div id="cy"></div> <!-- Aquí Cytoscape.js renderizará el grafo -->
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
 </body>
 </html>
