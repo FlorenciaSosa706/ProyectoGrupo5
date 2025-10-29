@@ -208,7 +208,6 @@ public Map<String, Object> obtenerGrafo() {
     List<NodoDTO> nodosDTO = new ArrayList<>();
     // No necesitamos aristasDTO a nivel raíz si ya las ponemos dentro del nodo
     // List<RutaDTO> aristasDTO = new ArrayList<>(); 
-
     for (NodoEntity n : nodosEntities) {
         NodoDTO nodo = new NodoDTO();
         nodo.nombre = n.getNombre();

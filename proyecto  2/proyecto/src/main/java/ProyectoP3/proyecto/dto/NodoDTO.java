@@ -4,7 +4,6 @@ package ProyectoP3.proyecto.dto;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public class NodoDTO {
     public String nombre;
     public String tipo;

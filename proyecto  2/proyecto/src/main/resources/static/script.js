@@ -187,7 +187,6 @@ async function ejecutarRuta() {
         }
         
         const rutaNombres = await resp.json();
-        
         if (Array.isArray(rutaNombres) && rutaNombres.length > 0) {
             mostrarRutaEnCytoscape(rutaNombres);
             calcularYMostrarEstadisticasRuta(rutaNombres); //AGREGADOOO///

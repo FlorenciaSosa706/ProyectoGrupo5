@@ -8,7 +8,6 @@ public class RutaDTO {
     public String clima;
     public double obstaculos;
     public double pesoTotal; // Para calcular en el frontend o si ya lo tienes en la entidad
-
     // Puedes añadir un constructor si lo prefieres
     public RutaDTO() {}
 
