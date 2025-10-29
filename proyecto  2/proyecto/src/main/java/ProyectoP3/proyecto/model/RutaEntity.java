@@ -37,7 +37,7 @@ public class RutaEntity {
     public String getClima() { return clima; }
     public double getObstaculos() { return obstaculos; }
     public NodoEntity getDestino() { return destino; }
-
+    
     public void setTiempo(double tiempo) { this.tiempo = tiempo; }
     public void setEnergia(double energia) { this.energia = energia; }
     public void setClima(String clima) { this.clima = clima; }

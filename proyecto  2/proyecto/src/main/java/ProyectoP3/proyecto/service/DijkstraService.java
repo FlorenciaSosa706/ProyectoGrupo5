@@ -1,74 +1,79 @@
 package ProyectoP3.proyecto.service;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
 import ProyectoP3.proyecto.model.RutaEntity;
-import org.springframework.stereotype.Service;
 
 @Service
 public class DijkstraService {
 
-    // Tipo de peso: "tiempo", "energia", "obstaculos" o cualquier combinación
-    private String tipoPeso = "tiempo"; // HAY QUE DECIDIRSE CON EL TIPO DE PESO, PERO SE PUEDE CAMBIAR.
-
-    public void setTipoPeso(String tipoPeso) {
-        this.tipoPeso = tipoPeso;
-    }
-
     public List<NodoEntity> calcularRutaMinima(NodoEntity origen, NodoEntity destino) {
-        Map<NodoEntity, Double> distancias = new HashMap<>();
-        Map<NodoEntity, NodoEntity> predecesores = new HashMap<>();
-        Set<NodoEntity> visitados = new HashSet<>();
-        PriorityQueue<NodoEntity> cola = new PriorityQueue<>(Comparator.comparingDouble(distancias::get));
+        Map<String, Double> distancias = new HashMap<>();
+        Map<String, NodoEntity> predecesores = new HashMap<>();
+        Set<String> visitados = new HashSet<>();
 
-        distancias.put(origen, 0.0);
+        distancias.put(origen.getNombre(), 0.0);
+
+        PriorityQueue<NodoEntity> cola = new PriorityQueue<>(
+            Comparator.comparingDouble(n -> distancias.getOrDefault(n.getNombre(), Double.MAX_VALUE))
+        );
         cola.add(origen);
 
         while (!cola.isEmpty()) {
             NodoEntity actual = cola.poll();
-            visitados.add(actual);
+            visitados.add(actual.getNombre());
 
-            if (actual.equals(destino)) break;
+            if (actual.getNombre().equals(destino.getNombre())) break;
 
-            // Explorar vecinos del nodo actual
-            for (RutaEntity ruta : actual.getRutas()) {
-                NodoEntity vecino = ruta.getDestino();
-                if (visitados.contains(vecino)) continue;
+            if (actual.getRutas() != null) {
+                for (RutaEntity r : actual.getRutas()) {
+                    NodoEntity vecino = r.getDestino();
+                    if (vecino == null || visitados.contains(vecino.getNombre())) continue;
 
-                
-                double peso = getPesoRuta(ruta); // calcula el peso según tipoPeso
-                // Calcular nueva distancia acumulada
-                double nuevaDistancia = distancias.getOrDefault(actual, Double.MAX_VALUE) + peso;
+                    double peso = calcularPeso(r, vecino.getUrgencia());
+                    double nuevaDistancia = distancias.getOrDefault(actual.getNombre(), Double.MAX_VALUE) + peso;
 
-                 // Si encontramos un camino más corto hacia el vecino, actualizamos datos
-                if (nuevaDistancia < distancias.getOrDefault(vecino, Double.MAX_VALUE)) {
-                    distancias.put(vecino, nuevaDistancia);
-                    predecesores.put(vecino, actual);
-                    cola.add(vecino);
+                    if (nuevaDistancia < distancias.getOrDefault(vecino.getNombre(), Double.MAX_VALUE)) {
+                        distancias.put(vecino.getNombre(), nuevaDistancia);
+                        predecesores.put(vecino.getNombre(), actual);
+                        cola.add(vecino);
+                    }
                 }
             }
         }
 
-        // Reconstrucción del camino final (del destino hacia el origen)
         List<NodoEntity> camino = new LinkedList<>();
         NodoEntity paso = destino;
         while (paso != null) {
-            camino.add(0, paso); // Insertar al principio para mantener el orden
-            paso = predecesores.get(paso);
+            camino.add(0, paso);
+            paso = predecesores.get(paso.getNombre());
+        }
+
+        if (camino.isEmpty() || !camino.get(0).getNombre().equals(origen.getNombre())) {
+            return Collections.emptyList();
         }
 
         return camino;
     }
 
-    // PUEDE QUE SEA  MODIFICADO DEPENDIENDO DE QUE QUEREMOS HACER CON EL PESO. Determina el peso a usar en cada ruta dependiendo del tipo configurado.
-    private double getPesoRuta(RutaEntity ruta) {
-        switch (tipoPeso.toLowerCase()) {
-            case "energia": return ruta.getEnergia();
-            case "obstaculos": return ruta.getObstaculos();
-            case "tiempo":
-            default:
-                return ruta.getTiempo();
+    private double calcularPeso(RutaEntity r, int urgencia) { //////
+        double clima = 0;
+        if(r.getClima() != null) {
+            if(r.getClima().equalsIgnoreCase("Viento")) clima = 0.2;
+            else if(r.getClima().equalsIgnoreCase("Lluvia")) clima = 0.4;
+            else if(r.getClima().equalsIgnoreCase("Tormenta")) clima = 0.7;
         }
+        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + clima;
     }
 }

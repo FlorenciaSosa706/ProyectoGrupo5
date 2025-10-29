@@ -157,7 +157,7 @@ public Map<String, Object> rutaDividida(@RequestParam List<String> nodos) {
             NodoEntity nodoDestino = nodoRepository.findByNombre(destino).block();
             if (nodoDestino != null) {
                 recorrido.add("Vuelo hacia " + nodoDestino.getNombre() + " (" + nodoDestino.getTipo() + ")");
-                recorrido.add("Entrega completada en " + nodoDestino.getNombre() + " ");
+                recorrido.add("Entrega completada en " + nodoDestino.getNombre() + " ✅");
                 actual = nodoDestino;
             }
         }
