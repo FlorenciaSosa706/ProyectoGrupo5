@@ -23,28 +23,15 @@ public class NodoEntity {
     @Property("personasAfectadas")
     private int personasAfectadas;
 
-    // 👇 NUEVO: coordenadas del nodo en el mapa
-    @Property("x")
-    private double x;
-
-    @Property("y")
-    private double y;
-
-    @Relationship(type = "CONECTA_CON")
-    private Set<RutaEntity> rutas = new HashSet<>();
-
     public NodoEntity() {}
 
-    public NodoEntity(String nombre, String tipo, int urgencia, int personasAfectadas, double x, double y) {
+    public NodoEntity(String nombre, String tipo, int urgencia, int personasAfectadas) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.urgencia = urgencia;
         this.personasAfectadas = personasAfectadas;
-        this.x = x;
-        this.y = y;
     }
 
-    // Getters y setters
     public String getNombre() { return nombre; }
     public void setNombre(String nombre) { this.nombre = nombre; }
 
@@ -57,12 +44,17 @@ public class NodoEntity {
     public int getPersonasAfectadas() { return personasAfectadas; }
     public void setPersonasAfectadas(int personasAfectadas) { this.personasAfectadas = personasAfectadas; }
 
-    public double getX() { return x; }
-    public void setX(double x) { this.x = x; }
-
-    public double getY() { return y; }
-    public void setY(double y) { this.y = y; }
+    @Relationship(type = "CONECTA_CON")
+    private Set<RutaEntity> rutas = new HashSet<>();
 
     public Set<RutaEntity> getRutas() { return rutas; }
     public void setRutas(Set<RutaEntity> rutas) { this.rutas = rutas; }
+
+
+
+
+
+
+
+
 }
