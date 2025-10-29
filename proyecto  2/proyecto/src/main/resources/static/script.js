@@ -1,12 +1,11 @@
-let cy; // Variable global para la instancia de Cytoscape
+let cy;
 let nodosData = [];
 let aristasData = [];
 
-// Inicializar Cytoscape.js
 function inicializarCytoscape() {
     cy = cytoscape({
         container: document.getElementById('cy'),
-        elements: [], // Se cargan después
+        elements: [], 
         style: [
             {
                 selector: 'node',
@@ -36,12 +35,10 @@ function inicializarCytoscape() {
                     
                 }
             },
-            // Estilos específicos para tipos de nodos (del CSS)
             { selector: '.CentroDistribucion', style: { 'background-color': '#3b82f6' } },
             { selector: '.Hospital', style: { 'background-color': '#ef4444' } },
             { selector: '.ZonaAfectada', style: { 'background-color': '#f97316' } },
             { selector: '.CentroRecarga', style: { 'background-color': '#06b6d4' } },
-            // Estilo para nodos de la ruta
             {
                 selector: '.ruta-nodo',
                 style: {
@@ -54,7 +51,6 @@ function inicializarCytoscape() {
                     'z-index': 9999
                 }
             },
-            // Estilo para aristas de la ruta
             {
                 selector: '.ruta-arista',
                 style: {
@@ -68,14 +64,13 @@ function inicializarCytoscape() {
             }
         ],
         layout: {
-            name: 'preset', // Usaremos las posiciones 'x' e 'y' de los nodos
+            name: 'preset', 
             fit: true,
             padding: 50
         }
     });
 }
 
-// Cargar grafo desde el backend y dibujar en Cytoscape
 async function cargarGrafoBackend() {
     document.getElementById("status-message").textContent = "Cargando grafo...";
     try {
@@ -92,11 +87,11 @@ async function cargarGrafoBackend() {
                 urgencia: n.urgencia,
                 personasAfectadas: n.personasAfectadas
             },
-            position: { // Usar las coordenadas si existen, sino generar algunas
+            position: { 
                 x: n.x > 0 ? n.x : 100 + (i % 5) * 150,
                 y: n.y > 0 ? n.y : 100 + Math.floor(i / 5) * 150
             },
-            classes: n.tipo // Para aplicar estilos CSS por tipo
+            classes: n.tipo 
         }));
 
         aristasData = [];
@@ -108,22 +103,21 @@ async function cargarGrafoBackend() {
                             id: `${n.nombre}-${r.destino}`,
                             source: n.nombre,
                             target: r.destino,
-                            tiempo: r.tiempo, // Asegúrate que el DTO en el backend devuelva estos
+                            tiempo: r.tiempo, 
                             energia: r.energia,
                             clima: r.clima,
                             obstaculos: r.obstaculos,
-                            pesoTotal: r.pesoTotal // Si lo calculas en el backend
+                            pesoTotal: r.pesoTotal
                         }
                     });
                 });
             }
         });
         
-        // Limpiar Cytoscape y añadir nuevos elementos
         cy.remove(cy.elements());
         cy.add(nodosData);
         cy.add(aristasData);
-        cy.layout({ name: 'preset' }).run(); // Reaplicar el layout para usar las posiciones
+        cy.layout({ name: 'preset' }).run(); 
         
         cargarCombos();
         document.getElementById("status-message").textContent = "✅ Grafo cargado";
@@ -137,7 +131,6 @@ async function cargarGrafoBackend() {
     }
 }
 
-// Poblar los selectores de origen y destino
 function cargarCombos() {
     const origenSelect = document.getElementById("origen");
     const destinoSelect = document.getElementById("destino");
@@ -153,7 +146,6 @@ function cargarCombos() {
     });
 }
 
-// Lógica para ejecutar la ruta con el algoritmo seleccionado
 async function ejecutarRuta() {
     const origen = document.getElementById("origen").value;
     const destino = document.getElementById("destino").value;
@@ -171,7 +163,6 @@ async function ejecutarRuta() {
     document.getElementById("nodes-visited").textContent = 'Calculando...';
 
 
-    // Resetear estilos de ruta anteriores
     cy.elements().removeClass('ruta-nodo').removeClass('ruta-arista');
 
     let url = `http://localhost:8080/rutas/${algoritmo}/${origen}/${destino}`;
@@ -189,14 +180,11 @@ async function ejecutarRuta() {
         const rutaNombres = await resp.json();
         if (Array.isArray(rutaNombres) && rutaNombres.length > 0) {
             mostrarRutaEnCytoscape(rutaNombres);
-            calcularYMostrarEstadisticasRuta(rutaNombres); //AGREGADOOO///
+            calcularYMostrarEstadisticasRuta(rutaNombres);
             document.getElementById("status-message").textContent = `✅ Ruta ${algoritmo} encontrada!`;
             document.getElementById("nodes-visited").textContent = rutaNombres.length;
             
-            // Si el backend devuelve el peso, lo mostramos
-            // Para dijkstra, si el backend devuelve un objeto con {ruta: [], costoTotal: X}
-            // Tendrías que ajustar la respuesta del backend para Dijkstra
-            // Por ahora, solo simularé el cálculo del costo para mostrar algo.
+
             if (algoritmo === 'dijkstra') {
                 calcularYMostrarCostoRuta(rutaNombres);
             } else {
@@ -218,7 +206,6 @@ async function ejecutarRuta() {
     }
 }
 
-// Función para calcular y mostrar el costo de la ruta (simple aproximación para el frontend)
 function calcularYMostrarCostoRuta(rutaNombres) {
     let costoTotalSimulado = 0;
     for (let i = 0; i < rutaNombres.length - 1; i++) {
@@ -226,7 +213,6 @@ function calcularYMostrarCostoRuta(rutaNombres) {
         const destinoNombre = rutaNombres[i+1];
         const arista = cy.edges(`[source = '${origenNombre}'][target = '${destinoNombre}']`);
         if (arista.length > 0) {
-            // Aquí deberías usar el 'tipoPesoDijkstra' para sumar el costo correcto
             const tipoPeso = document.getElementById("tipoPesoDijkstra").value;
             let pesoArista = 0;
             switch(tipoPeso) {
@@ -234,23 +220,21 @@ function calcularYMostrarCostoRuta(rutaNombres) {
                 case 'energia': pesoArista = arista.data('energia'); break;
                 case 'obstaculos': pesoArista = arista.data('obstaculos') * 100; break; // Asumir factor para obstaculos
                 case 'urgencia': 
-                    // Para urgencia, necesitamos la urgencia del NODO destino.
-                    // Esto requeriría ajustar el backend para devolver más datos de la arista o recalcular aquí
+                   
                     const nodoDestino = cy.nodes(`#${destinoNombre}`).data();
                     pesoArista = nodoDestino ? nodoDestino.urgencia * 10 : 0; // Asumir factor para urgencia
                     break;
                 case 'total':
-                    // Este es el cálculo que definiste en el TPO:
                     // pesoTotal = (tiempo * 0.3) + (energia * 0.3) + (obstaculos * 0.2) + (urgencia * 0.2)
                     const nodeData = cy.nodes(`#${destinoNombre}`).data();
                     const urgenciaDestino = nodeData ? nodeData.urgencia : 0;
                     pesoArista = (arista.data('tiempo') * 0.3) +
                                  (arista.data('energia') * 0.3) +
                                  (arista.data('obstaculos') * 0.2) +
-                                 (urgenciaDestino * 0.2); // Usar urgencia del nodo destino
+                                 (urgenciaDestino * 0.2); 
                     break;
                 default:
-                    pesoArista = arista.data('tiempo'); // Fallback por defecto
+                    pesoArista = arista.data('tiempo');
             }
             costoTotalSimulado += pesoArista;
         }
@@ -258,7 +242,6 @@ function calcularYMostrarCostoRuta(rutaNombres) {
     document.getElementById("total-cost").textContent = costoTotalSimulado.toFixed(2);
 }
 
-//AGREGADOOO///
 function calcularYMostrarEstadisticasRuta(rutaNombres) {
     let totalTiempo = 0;
     let totalEnergia = 0;
@@ -289,7 +272,6 @@ function calcularYMostrarEstadisticasRuta(rutaNombres) {
 
     const promedioUrgencia = cantidadNodosUrgencia > 0 ? totalUrgencia / cantidadNodosUrgencia : 0;
 
-    // Mostrar en el panel
     document.getElementById("stat-tiempo").textContent = totalTiempo.toFixed(2);
     document.getElementById("stat-energia").textContent = totalEnergia.toFixed(2);
     document.getElementById("stat-obstaculos").textContent = totalObstaculos.toFixed(2);
@@ -299,21 +281,17 @@ function calcularYMostrarEstadisticasRuta(rutaNombres) {
 
 
 
-// Mostrar la ruta resaltada en Cytoscape
 function mostrarRutaEnCytoscape(rutaNombres) {
     const routeList = document.getElementById("route-list");
-    routeList.innerHTML = ''; // Limpiar la lista anterior
+    routeList.innerHTML = ''; 
 
-    // Quitar estilos de rutas anteriores
     cy.elements().removeClass('ruta-nodo').removeClass('ruta-arista');
 
-    // Resaltar nodos y aristas de la ruta
     for (let i = 0; i < rutaNombres.length; i++) {
         const nodoNombre = rutaNombres[i];
         const node = cy.$id(nodoNombre);
         node.addClass('ruta-nodo');
 
-        // Añadir a la lista de ruta detallada
         const item = document.createElement("div");
         item.className = "route-step";
         item.innerHTML = `<div class="route-step-number">${i+1}</div><div class="route-step-name">${nodoNombre}</div>`;
@@ -321,38 +299,34 @@ function mostrarRutaEnCytoscape(rutaNombres) {
 
         if (i < rutaNombres.length - 1) {
             const nextNodoNombre = rutaNombres[i+1];
-            // Buscar la arista entre el nodo actual y el siguiente
             const edge = cy.edges(`[source = '${nodoNombre}'][target = '${nextNodoNombre}']`);
             if (edge.length > 0) {
                 edge.addClass('ruta-arista');
             }
         }
     }
-    cy.center(cy.$('.ruta-nodo')); // Centrar la vista en la ruta encontrada
+    cy.center(cy.$('.ruta-nodo')); 
 }
 
-// Función para reiniciar la vista del grafo
 function resetearGrafo() {
     cy.elements().removeClass('ruta-nodo').removeClass('ruta-arista');
     document.getElementById("route-list").innerHTML = '';
     document.getElementById("status-message").textContent = "Grafo reiniciado";
     document.getElementById("total-cost").textContent = 'N/A';
     document.getElementById("nodes-visited").textContent = 'N/A';
-    cargarCombos(); // Recargar combos para resetear selecciones
+    cargarCombos();
     document.getElementById("origen").value = "";
     document.getElementById("destino").value = "";
     document.getElementById("algoritmo").value = "greedy";
     document.getElementById("tipo-peso-dijkstra-group").style.display = 'none';
 }
 
-// Event Listeners y carga inicial
 window.addEventListener("load", () => {
-    inicializarCytoscape(); // Primero inicializar Cytoscape
-    cargarGrafoBackend();   // Luego cargar los datos del backend
+    inicializarCytoscape(); 
+    cargarGrafoBackend();  
     document.getElementById("ejecutar").addEventListener("click", ejecutarRuta);
     document.getElementById("reset").addEventListener("click", resetearGrafo);
 
-    // Mostrar/ocultar selector de tipo de peso para Dijkstra
     document.getElementById("algoritmo").addEventListener("change", (event) => {
         if (event.target.value === 'dijkstra') {
             document.getElementById("tipo-peso-dijkstra-group").style.display = 'block';

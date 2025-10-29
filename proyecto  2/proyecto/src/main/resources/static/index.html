@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulación de Rutas de Drones</title>
-  <!-- Incluye Cytoscape.js -->
   <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
   <link rel="stylesheet" href="style.css">
 </head>
@@ -16,7 +15,6 @@
   </header>
 
   <div class="main-content">
-    <!-- Panel de control -->
     <div class="control-panel">
       <div class="panel-section">
         <h3>Opciones de Ruta</h3>
@@ -36,6 +34,7 @@
             <option value="dfs">DFS</option>
             <option value="poda">Ramificación y Poda</option>
             <option value="dijkstra">Dijkstra</option>
+            
           </select>
         </div>
         <div class="form-group" id="tipo-peso-dijkstra-group" style="display: none;">
@@ -75,9 +74,8 @@
       <div id="status-message">Cargando grafo...</div>
     </div>
 
-    <!-- Mapa -->
     <div class="map-container">
-      <div id="cy"></div> <!-- Aquí Cytoscape.js renderizará el grafo -->
+      <div id="cy"></div> 
     </div>
   </div>
 </div>
