@@ -156,12 +156,12 @@ public Map<String, Object> rutaDividida(@RequestParam List<String> nodos) {
         for (String destino : paradas) {
             NodoEntity nodoDestino = nodoRepository.findByNombre(destino).block();
             if (nodoDestino != null) {
-                recorrido.add("Vuelo hacia " + nodoDestino.getNombre() + " (" + nodoDestino.getTipo() + ")");
+                recorrido.add("➡️ Vuelo hacia " + nodoDestino.getNombre() + " (" + nodoDestino.getTipo() + ")");
                 recorrido.add("Entrega completada en " + nodoDestino.getNombre() + " ✅");
                 actual = nodoDestino;
             }
         }
-        recorrido.add("Dron regresa al Centro de Distribución");
+        recorrido.add("🏁 Dron regresa al Centro de Distribución");
         Map<String, Object> respuesta = new HashMap<>();
         respuesta.put("ruta_dron", recorrido);
         respuesta.put("nodos_visitados", paradas.length + 1);
@@ -170,12 +170,10 @@ public Map<String, Object> rutaDividida(@RequestParam List<String> nodos) {
 
     @Autowired
 private DijkstraService dijkstraService;
-
 @GetMapping("/dijkstra/{origen}/{destino}")
 public List<String> rutaDijkstra(
         @PathVariable String origen,
-        @PathVariable String destino,
-        @RequestParam(required = false) String tipoPeso) {
+        @PathVariable String destino) {
 
     NodoEntity nodoInicio = nodoRepository.findByNombre(origen.trim()).block();
     NodoEntity nodoDestino = nodoRepository.findByNombre(destino.trim()).block();
@@ -184,9 +182,6 @@ public List<String> rutaDijkstra(
         throw new RuntimeException("Origen o destino no encontrado");
     }
 
-    if (tipoPeso != null && !tipoPeso.isEmpty()) {
-        dijkstraService.setTipoPeso(tipoPeso);
-    }
 
     List<NodoEntity> ruta = dijkstraService.calcularRutaMinima(nodoInicio, nodoDestino);
 
@@ -196,6 +191,7 @@ public List<String> rutaDijkstra(
     }
     return nombres;
 }
+
 
 @GetMapping("/grafo")
 public Map<String, Object> obtenerGrafo() {
