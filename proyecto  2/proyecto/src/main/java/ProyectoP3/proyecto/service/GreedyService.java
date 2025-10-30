@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -13,6 +14,13 @@ import ProyectoP3.proyecto.model.RutaEntity;
 
 @Service
 public class GreedyService {
+
+    private final PesoService pesoService;
+
+    @Autowired
+    public GreedyService(PesoService pesoService) {
+        this.pesoService = pesoService;
+    }
 
     public List<NodoEntity> encontrarRutaGreedy(NodoEntity inicio, NodoEntity destino) {
         Set<NodoEntity> visitados = new HashSet<>();
@@ -25,7 +33,7 @@ public class GreedyService {
 
             RutaEntity mejorRuta = actual.getRutas().stream()
                 .filter(r -> !visitados.contains(r.getDestino()))
-                .min(Comparator.comparingDouble(r -> calcularPeso(r, r.getDestino().getUrgencia())))
+                .min(Comparator.comparingDouble(r -> pesoService.calcularPeso(r, r.getDestino().getUrgencia())))
                 .orElse(null);
 
             if (mejorRuta == null) break;
@@ -34,14 +42,5 @@ public class GreedyService {
 
         ruta.add(destino);
         return ruta;
-    }
-
-    private double calcularPeso(RutaEntity r, int urgencia) {
-        double climaFactor = 0.0;
-        if(r.getClima().equalsIgnoreCase("Viento")) climaFactor = 0.2;
-        if(r.getClima().equalsIgnoreCase("Lluvia")) climaFactor = 0.4;
-        if(r.getClima().equalsIgnoreCase("Tormenta")) climaFactor = 0.7;
-
-        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + climaFactor;
     }
 }

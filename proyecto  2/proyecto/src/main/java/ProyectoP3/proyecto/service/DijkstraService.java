@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -17,6 +18,13 @@ import ProyectoP3.proyecto.model.RutaEntity;
 
 @Service
 public class DijkstraService {
+
+    private final PesoService pesoService;
+
+    @Autowired
+    public DijkstraService(PesoService pesoService) {
+        this.pesoService = pesoService;
+    }
 
     public List<NodoEntity> calcularRutaMinima(NodoEntity origen, NodoEntity destino) {
         Map<String, Double> distancias = new HashMap<>();
@@ -41,7 +49,7 @@ public class DijkstraService {
                     NodoEntity vecino = r.getDestino();
                     if (vecino == null || visitados.contains(vecino.getNombre())) continue;
 
-                    double peso = calcularPeso(r, vecino.getUrgencia());
+                    double peso = pesoService.calcularPeso(r, vecino.getUrgencia());
                     double nuevaDistancia = distancias.getOrDefault(actual.getNombre(), Double.MAX_VALUE) + peso;
 
                     if (nuevaDistancia < distancias.getOrDefault(vecino.getNombre(), Double.MAX_VALUE)) {
@@ -65,15 +73,5 @@ public class DijkstraService {
         }
 
         return camino;
-    }
-
-    private double calcularPeso(RutaEntity r, int urgencia) { //////
-        double clima = 0;
-        if(r.getClima() != null) {
-            if(r.getClima().equalsIgnoreCase("Viento")) clima = 0.2;
-            else if(r.getClima().equalsIgnoreCase("Lluvia")) clima = 0.4;
-            else if(r.getClima().equalsIgnoreCase("Tormenta")) clima = 0.7;
-        }
-        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + clima;
     }
 }

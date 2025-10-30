@@ -2,6 +2,7 @@ package ProyectoP3.proyecto.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -10,6 +11,13 @@ import ProyectoP3.proyecto.model.RutaEntity;
 @Service
 public class ProgramacionDinamicaService {
 
+    private final PesoService pesoService;
+
+    @Autowired
+    public ProgramacionDinamicaService(PesoService pesoService) {
+        this.pesoService = pesoService;
+    }
+    
     public double resolverRutaDinamica(List<NodoEntity> rutaSecuencial) {
         if (rutaSecuencial == null || rutaSecuencial.size() < 2) return 0;
 
@@ -22,7 +30,7 @@ public class ProgramacionDinamicaService {
 
             RutaEntity ruta = buscarRuta(anterior, actual);
             if (ruta != null) {
-                double peso = calcularPeso(ruta, actual.getUrgencia());
+                double peso = pesoService.calcularPeso(ruta, actual.getUrgencia());
                 dp[i] = dp[i - 1] + peso;
             } else {
                 dp[i] = dp[i - 1] + 1000; // penalización si no hay conexión directa
@@ -40,15 +48,5 @@ public class ProgramacionDinamicaService {
             }
         }
         return null;
-    }
-
-    private double calcularPeso(RutaEntity r, int urgencia) {
-        double clima = 0;
-        if (r.getClima() != null) {
-            if (r.getClima().equalsIgnoreCase("Viento")) clima = 0.2;
-            else if (r.getClima().equalsIgnoreCase("Lluvia")) clima = 0.4;
-            else if (r.getClima().equalsIgnoreCase("Tormenta")) clima = 0.7;
-        }
-        return (r.getTiempo() * 0.3) + (r.getEnergia() * 0.3) + (r.getObstaculos() * 0.2) + (urgencia * 0.2) + clima;
     }
 }
