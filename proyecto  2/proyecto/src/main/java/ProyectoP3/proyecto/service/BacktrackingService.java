@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -16,7 +15,7 @@ public class BacktrackingService {
 
     private final PesoService pesoService;
 
-    @Autowired
+    //@Autowired
     public BacktrackingService(PesoService pesoService) {
         this.pesoService = pesoService;
     }

@@ -2,7 +2,6 @@ package ProyectoP3.proyecto.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -13,7 +12,7 @@ public class DivideVencerasService {
 
     private final PesoService pesoService;
 
-    @Autowired
+    //@Autowired
     public DivideVencerasService(PesoService pesoService) {
         this.pesoService = pesoService;
     }

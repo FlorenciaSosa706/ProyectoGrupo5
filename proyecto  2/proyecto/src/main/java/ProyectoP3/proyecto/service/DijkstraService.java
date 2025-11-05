@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ProyectoP3.proyecto.model.NodoEntity;
@@ -21,7 +20,7 @@ public class DijkstraService {
 
     private final PesoService pesoService;
 
-    @Autowired
+    //@Autowired
     public DijkstraService(PesoService pesoService) {
         this.pesoService = pesoService;
     }
