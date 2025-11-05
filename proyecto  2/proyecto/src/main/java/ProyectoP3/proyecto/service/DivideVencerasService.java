@@ -29,7 +29,6 @@ public class DivideVencerasService {
             if(ruta != null) {
                 pesoTotal += pesoService.calcularPeso(ruta, destino.getUrgencia());
             } else {
-                // si no hay conexión directa, le sumo un peso grande como penalización
                 pesoTotal += 1000;
             }
         }
